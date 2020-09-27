@@ -1,0 +1,11 @@
+
+*******************************************************************************************************
+* Implement a sign up page
+* Add thge review directly on the website
+* Hide the entire booking section on detail page if current usetr has already booked the tour
+* Prevent duplicate bookings and reviews on model
+* Implement "Like tour " functionality and favourity tour page
+* Manage pages CRUD tours, users, review, and bookings.
+* Implement restriction user can only review that they have actually booked
+* Improve future dates, Add participate, Book instance tour
+* Implement advance authentication features: confirm user email, two-factor authentication
