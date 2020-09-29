@@ -14,12 +14,13 @@ const signToken = (id) => {
 
 const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
-  const cookieOptions = res.cookie("jwt", token, {
+
+  res.cookie("jwt", token, {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
-    secure: req.secure || req.headers("x-forwarded-proto") === "https",
+    secure: req.secure || req.headers["x-forwarded-proto"] === "https",
   });
 
   // Remove password from output
@@ -35,11 +36,15 @@ const createSendToken = (user, statusCode, req, res) => {
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
-  const newUser = await User.create(req.body);
+  const newUser = await User.create({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+    passwordConfirm: req.body.passwordConfirm,
+  });
 
   const url = `${req.protocol}://${req.get("host")}/me`;
   // console.log(url);
-
   await new Email(newUser, url).sendWelcome();
 
   createSendToken(newUser, 201, req, res);

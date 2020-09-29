@@ -7,6 +7,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
 const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser");
 const compression = require("compression");
 const cors = require("cors");
 
@@ -15,9 +16,9 @@ const globalErrorHandler = require("./controllers/errorController");
 const tourRouter = require("./routes/tourRoutes");
 const userRouter = require("./routes/userRoutes");
 const reviewRouter = require("./routes/reviewRoutes");
-const bookingController = require("./controllers/bookinController");
+const bookingRouter = require("./routes/bookingRoutes");
+const bookingController = require("./controllers/bookingController");
 const viewRouter = require("./routes/viewRoutes");
-const bookinRouter = require("./routes/bookingRoute");
 
 // Start express app
 const app = express();
@@ -28,9 +29,13 @@ app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 
 // 1) GLOBAL MIDDLEWARES
-
 // Implement CORS
 app.use(cors());
+// Access-Control-Allow-Origin *
+// api.natours.com, front-end natours.com
+// app.use(cors({
+//   origin: 'https://www.natours.com'
+// }))
 
 app.options("*", cors());
 // app.options('/api/v1/tours/:id', cors());
@@ -54,10 +59,10 @@ const limiter = rateLimit({
 });
 app.use("/api", limiter);
 
-// Payment spripe with webhook
+// Stripe webhook, BEFORE body-parser, because stripe needs the body as stream
 app.post(
   "/webhook-checkout",
-  express.raw({ type: "application/json" }),
+  bodyParser.raw({ type: "application/json" }),
   bookingController.webhookCheckout
 );
 
@@ -100,7 +105,7 @@ app.use("/", viewRouter);
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/reviews", reviewRouter);
-app.use("/api/v1/bookings", bookinRouter);
+app.use("/api/v1/bookings", bookingRouter);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
